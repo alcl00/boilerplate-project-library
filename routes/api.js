@@ -8,6 +8,8 @@
 
 'use strict';
 
+const BookModel = require('../model').Book
+
 module.exports = function (app) {
 
   app.route('/api/books')
