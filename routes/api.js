@@ -8,26 +8,45 @@
 
 'use strict';
 
+const { Book } = require('../model');
+
 const BookModel = require('../model').Book
 
 module.exports = function (app) {
 
   app.route('/api/books')
     .get(function (req, res){
-      //response will be array of book objects
-      //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
-      res.json({});
+      BookModel.find()
+      .then(data => {
+        if(!data) {
+          res.json({});
+        }
+        else {
+          res.json(data);
+        }
+      })
+      
     })
     
-    .post(function (req, res){
+    .post(async function (req, res){
       let title = req.body.title;
-      //response will contain new book object including atleast _id and title
-      res.json({});
+
+      if(!title) {
+        res.json('missing required field title')
+      }
+      else {
+        let newBook = await BookModel.create({title: title});
+
+        res.json({ _id: newBook._id, title: newBook.title });
+      }
+      
     })
     
     .delete(function(req, res){
-      //if successful response will be 'complete delete successful'
-      res.json({});
+      BookModel.deleteMany({})
+      .then(data => {
+        res.json('complete delete successful')
+      })
     });
 
 
@@ -35,23 +54,48 @@ module.exports = function (app) {
   app.route('/api/books/:id')
     .get(function (req, res){
       let bookid = req.params.id;
-      //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
-      res.json({})
-      //If ID invalid:
-      //res.json('no book exists')
+      BookModel.findById(bookid)
+      .then(data => {
+        if(!data) {
+          res.json('no book exists')
+        }
+        else {
+          res.json(data)
+        }
+      })
     })
     
     .post(function(req, res){
       let bookid = req.params.id;
       let comment = req.body.comment;
-      //json res format same as .get
-      res.json({})
+      if(!comment) {
+        res.json('missing required field comment')
+      }
+      else {
+        BookModel.findByIdAndUpdate(bookid, {$inc: {commentcount: 1}, $push: {comments: comment}}, {new: true})
+        .then(data => {
+          if(!data) {
+            res.json('no book exists')
+          }
+          else {
+            res.json(data)
+          }
+        })
+      }
+      
     })
     
     .delete(function(req, res){
       let bookid = req.params.id;
-      //if successful response will be 'delete successful'
-      res.json({})
+      BookModel.findByIdAndDelete(bookid)
+      .then(data => {
+        if(!data) {
+          res.json('no book exists');
+        }
+        else {
+          res.json('delete successful')
+        }
+      })
     });
   
 };

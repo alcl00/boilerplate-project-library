@@ -23,13 +23,13 @@ suite('Functional Tests', function() {
       test('Test POST /api/books with title', function(done) {
         chai.request(server)
         .post('/api/books')
-        .send({'title': 'Moby Dick'})
+        .send({'title': 'test'})
         .end(function(err, res) {
           id = res.body._id;
           assert.equal(res.status, 200);
           assert.property(res.body, '_id', 'POST response should contain _id');
           assert.property(res.body, 'title', 'POST response should contain title');
-          assert.equal(res.body.title, 'Moby Dick')
+          assert.equal(res.body.title, 'test')
           done();
         })
       });
@@ -88,7 +88,7 @@ suite('Functional Tests', function() {
             assert.property(res.body, 'commentcount', 'Book should contain commentcount');
             assert.property(res.body, 'title', 'Book should contain title');
             assert.property(res.body, '_id', 'Book should contain _id');
-            assert.equal(res.body.title, 'Moby Dick');
+            assert.equal(res.body.title, 'test');
             done();
           });
         });
@@ -105,8 +105,8 @@ suite('Functional Tests', function() {
           assert.property(res.body, '_id', 'POST response should contain _id');
           assert.property(res.body, 'title', 'POST response should contain title');
           assert.property(res.body, 'commentcount', 'Book should contain commentcount');
-          assert.equal(res.body.title, 'Moby Dick')
-          assert.equal(res.body.comment, 'A classic')
+          assert.equal(res.body.title, 'test')
+          assert.equal(res.body.comments[0], 'A classic')
           assert.isAbove(res.body.commentcount, 0)
           done();
         })
@@ -126,7 +126,9 @@ suite('Functional Tests', function() {
       test('Test POST /api/books/[id] with comment, id not in db', function(done){
         chai.request(server)
         .post(`/api/books/${invalidId}`)
-        .send({})
+        .send({
+          comment: 'Great read'
+        })
         .end(function(err, res) {
           assert.equal(res.status, 200);
           assert.equal(res.body, 'no book exists')
@@ -148,7 +150,7 @@ suite('Functional Tests', function() {
         })
       });
 
-      test('Test DELETE /api/books/[id] with  id not in db', function(done){
+      test('Test DELETE /api/books/[id] with id not in db', function(done){
         chai.request(server)
         .delete(`/api/books/${invalidId}`)
         .end(function(err, res) {
