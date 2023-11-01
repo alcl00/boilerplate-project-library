@@ -1,101 +1,74 @@
 /*
-*
-*
-*       Complete the API routing below
-*       
-*       
-*/
+ *
+ *
+ *       Complete the API routing below
+ *
+ *
+ */
 
-'use strict';
+"use strict";
 
-const { Book } = require('../model');
-
-const BookModel = require('../model').Book
+const BookModel = require("../model").Book;
 
 module.exports = function (app) {
-
-  app.route('/api/books')
-    .get(function (req, res){
-      BookModel.find()
-      .then(data => {
-        if(!data) {
-          res.json({});
-        }
-        else {
-          res.json(data);
-        }
-      })
-      
+  app
+    .route("/api/books")
+    .get(function (req, res) {
+      BookModel.find().then((data) => {
+        res.json(data || {});
+      });
     })
-    
-    .post(async function (req, res){
+
+    .post(async function (req, res) {
       let title = req.body.title;
-
-      if(!title) {
-        res.json('missing required field title')
+      if (!title) {
+        res.json("missing required field title");
+        return;
       }
-      else {
-        let newBook = await BookModel.create({title: title});
+      let newBook = await BookModel.create({ title: title });
 
-        res.json({ _id: newBook._id, title: newBook.title });
-      }
-      
+      res.json({ _id: newBook._id, title: newBook.title });
     })
-    
-    .delete(function(req, res){
-      BookModel.deleteMany({})
-      .then(data => {
-        res.json('complete delete successful')
-      })
+
+    .delete(function (req, res) {
+      BookModel.deleteMany({}).then((data) => {
+        res.json("complete delete successful");
+      });
     });
 
-
-
-  app.route('/api/books/:id')
-    .get(function (req, res){
+  app
+    .route("/api/books/:id")
+    .get(function (req, res) {
       let bookid = req.params.id;
-      BookModel.findById(bookid)
-      .then(data => {
-        if(!data) {
-          res.json('no book exists')
-        }
-        else {
-          res.json(data)
-        }
-      })
+      BookModel.findById(bookid).then((data) => {
+        res.json(data || "no book exists");
+      });
     })
-    
-    .post(function(req, res){
+
+    .post(function (req, res) {
       let bookid = req.params.id;
       let comment = req.body.comment;
-      if(!comment) {
-        res.json('missing required field comment')
+      if (!comment) {
+        res.json("missing required field comment");
+        return;
       }
-      else {
-        BookModel.findByIdAndUpdate(bookid, {$inc: {commentcount: 1}, $push: {comments: comment}}, {new: true})
-        .then(data => {
-          if(!data) {
-            res.json('no book exists')
-          }
-          else {
-            res.json(data)
-          }
-        })
-      }
-      
+      BookModel.findByIdAndUpdate(
+        bookid,
+        { $inc: { commentcount: 1 }, $push: { comments: comment } },
+        { new: true }
+      ).then((data) => {
+        res.json(data || "no book exists");
+      });
     })
-    
-    .delete(function(req, res){
+
+    .delete(function (req, res) {
       let bookid = req.params.id;
-      BookModel.findByIdAndDelete(bookid)
-      .then(data => {
-        if(!data) {
-          res.json('no book exists');
+      BookModel.findByIdAndDelete(bookid).then((data) => {
+        if (!data) {
+          res.json("no book exists");
+          return;
         }
-        else {
-          res.json('delete successful')
-        }
-      })
+        res.json("delete successful");
+      });
     });
-  
 };
